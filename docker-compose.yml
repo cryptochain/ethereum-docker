@@ -1,0 +1,31 @@
+version: '3.3'
+services:
+  eth-devnet:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: --datadir=/root/.ethereum/devchain --nodekeyhex=091bd6067cb4612df85d9c1ff85cc47f259ced4d4cd99816b14f35650f59c322 --rpc --rpcapi 'db,personal,eth,net,web3' --rpcaddr='0.0.0.0' --rpccorsdomain='*' --networkid=1234 init=/root/files/genesis.json --mine
+    deploy:
+      endpoint_mode: vip
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 10s
+      placement:
+        constraints: [node.hostname == vm01]
+    image: testing.wemic.io:5000/cryptochain/eth-devnet
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100k"
+        max-file: "10"
+    networks:
+      - web-services
+    ports:
+      - 8545:8545
+      - 30303:30303
+
+networks:
+  web-services:
+    external: true
